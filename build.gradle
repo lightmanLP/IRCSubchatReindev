@@ -1,5 +1,5 @@
 buildscript {
-	repositories {
+    repositories {
         mavenCentral()
         maven { url 'https://jitpack.io/' }
     }
@@ -8,20 +8,33 @@ buildscript {
     }
 }
 
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+sourceSets {
+    client {
+        compileClasspath += files('libs/reindev_client.jar')
+    }
+}
+
 apply plugin: 'foxloader.dev'
 
-version '1.1.1'
+version '0.0.1'
 
 foxloader {
     // forceReload = true
-    modId = "examplemod"
-    modName = "Fox Loader Example Mod"
+    modId = "ircsubchat"
+    modName = "IRC Subchat"
     modVersion = project.version
-    modDesc = "An example mod for developers!!"
-    clientMod = "com.fox2code.examplemod.ExampleModClient"
-    serverMod = "com.fox2code.examplemod.ExampleModServer"
+    modDesc = "Ingame IRC subchat"
+    clientMod = "com.lightmanlp.ircsubchat.IRCSubchatClient"
+    // serverMod = "com.fox2code.examplemod.ExampleModServer"
     // Development tools don't like that both client and server define
     // the same classes, so uncomment to disable the side inclusion.
     // includeClient = false
-    // includeServer = false
+    includeServer = false
 }

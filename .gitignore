@@ -8,3 +8,9 @@
 
 /.project
 /.classpath
+
+# Code
+/.vscode
+
+# libs
+/libs
