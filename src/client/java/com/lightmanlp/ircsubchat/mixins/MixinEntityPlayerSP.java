@@ -17,8 +17,10 @@ public abstract class MixinEntityPlayerSP extends EntityPlayer {
         super(world);
     }
 
-    @Inject(method = "sendChatMessage", at = @At(value = "HEAD"))
+    @Inject(method = "sendChatMessage", at = @At(value = "HEAD"), cancellable = true)
     public void sendChatMessageMixin(String s, CallbackInfo ci) {
-        CommandProcessor.process(s);
+        if (CommandProcessor.process(s)) {
+            ci.cancel();
+        }
     }
 }

@@ -1,12 +1,10 @@
 package com.lightmanlp.ircsubchat.configs;
 
-import org.pircbotx.delay.Delay;
-
 public abstract class Config {
-    public String server;
-    public String channel;
-    public String password;
-    public Delay reconnectDelay;
+    public String nickname = "randomuser";
+    public String server = "irc.libera.chat";
+    public String channel = "#reindev";
+    public String password = null;
 
-    public String[] msgPrefixes;
+    public String[] msgPrefixes = {"."};
 }
