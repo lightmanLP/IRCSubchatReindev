@@ -9,8 +9,9 @@ public class CommandProcessor {
         for (String prefix : cfg.msgPrefixes) {
             if (text.length() > prefix.length() && text.startsWith(prefix, 0)) {
                 IRCManager irc = IRCManager.get();
-                irc.send(text.substring(prefix.length()));
-                irc.viewMessage(cfg.nickname, text);
+				String cleanMsg = text.substring(prefix.length());
+                irc.send(cleanMsg);
+                irc.viewMessage(cfg.nickname, cleanMsg);
                 return true;
             }
         }
