@@ -74,3 +74,16 @@ foxloader {
     includeClient = true
     includeServer = false
 }
+
+apply plugin: 'maven-publish'
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.github.lightmanlp'
+            artifactId = 'ircsubchat'
+            version = project.version
+			
+            from components.java
+        }
+    }
+}
