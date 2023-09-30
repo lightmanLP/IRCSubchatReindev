@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.lightmanlp.ircsubchat.ChatProcessor;
 import com.lightmanlp.ircsubchat.commands.IRCToggleCommand;
 import com.lightmanlp.ircsubchat.commands.framework.ClientCommand;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -34,8 +35,13 @@ public abstract class MixinPlayerCommandHandler {
         String[] commandMessage,
         Operation<Void> original
     ) {
-        if (command instanceof ClientCommand || !Minecraft.getInstance().isMultiplayerWorld()) {
+        boolean execNeeded = (
+            command instanceof ClientCommand
+            || !Minecraft.getInstance().isMultiplayerWorld()
+        );
+        if (execNeeded) {
             original.call(self, command, commandExecutor, commandMessage);
         }
+        ChatProcessor.sendCurrentCommand.set(!execNeeded);
     }
 }

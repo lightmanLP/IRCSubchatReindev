@@ -1,10 +1,13 @@
 package com.lightmanlp.ircsubchat.configs;
 
-public abstract class Config {
-    public String nickname = "randomuser";
-    public String server = "irc.libera.chat";
-    public String channel = "#reindev";
-    public String password = null;
+import lombok.Getter;
+import lombok.Setter;
 
-    public String[] msgPrefixes = {"."};
+public class Config {
+    @Getter @Setter private String nickname = "randomuser";
+    @Getter @Setter private String server = "irc.libera.chat";
+    @Getter @Setter private String channel = "#reindev";
+    @Getter @Setter private String password = null;
+
+    @Getter @Setter private String[] msgPrefixes = {"."};
 }

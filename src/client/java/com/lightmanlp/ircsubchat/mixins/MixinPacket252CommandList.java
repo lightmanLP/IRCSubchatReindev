@@ -17,7 +17,7 @@ import net.minecraft.src.client.packets.Packet252CommandList;
 public abstract class MixinPacket252CommandList extends Packet {
     @Inject(method = "readPacketData", at = @At(value = "RETURN"))
     public void readPacketDataMixin(DataInputStream dataInputStream, CallbackInfo ci) {
-        // shit should be resolved with custom commands register
+        // TODO: shit should be resolved with custom commands register
         Packet252CommandList.commands.add(new IRCToggleCommand(PlayerCommandHandler.instance).getName());
     }
 }

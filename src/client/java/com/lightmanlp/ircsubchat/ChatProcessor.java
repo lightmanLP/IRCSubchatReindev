@@ -8,6 +8,7 @@ import net.minecraft.mitask.PlayerCommandHandler;
 public class ChatProcessor {
     private static ChatProcessor INSTANCE;
 
+    public static ThreadLocal<Boolean> sendCurrentCommand = new ThreadLocal<>();
     public boolean ircMode = false;
 
     public ChatProcessor() {
@@ -27,13 +28,17 @@ public class ChatProcessor {
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.lineIsCommand(text)) {
-            // TODO: do smth to prevent serverside command
             PlayerCommandHandler.instance.handleSlashCommand(text, mc.thePlayer);
-            return text;
+            assert sendCurrentCommand.get() != null;
+            if (sendCurrentCommand.get()) {
+                return text;
+            } else {
+                return null;
+            }
         }
 
         boolean localIrcMode = false;
-        for (String prefix : cfg.msgPrefixes) {
+        for (String prefix : cfg.getMsgPrefixes()) {
             if (text.length() > prefix.length() && text.startsWith(prefix, 0)) {
                 localIrcMode = true;
 				text = text.substring(prefix.length()).trim();
@@ -45,7 +50,6 @@ public class ChatProcessor {
         if (localIrcMode) {
             IRCManager irc = IRCManager.get();
             irc.send(text);
-            irc.viewMessage(cfg.nickname, text);
             return null;
         }
 

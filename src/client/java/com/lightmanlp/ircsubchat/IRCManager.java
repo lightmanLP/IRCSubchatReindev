@@ -29,10 +29,10 @@ public class IRCManager {
 
     public IRCManager() {
         this(
-            IRCSubchatMod.INSTANCE.cfg.nickname,
-            IRCSubchatMod.INSTANCE.cfg.server,
-            IRCSubchatMod.INSTANCE.cfg.channel,
-            IRCSubchatMod.INSTANCE.cfg.password,
+            IRCSubchatMod.INSTANCE.cfg.getNickname(),
+            IRCSubchatMod.INSTANCE.cfg.getServer(),
+            IRCSubchatMod.INSTANCE.cfg.getChannel(),
+            IRCSubchatMod.INSTANCE.cfg.getPassword(),
             new AdaptingDelay(500, 10000)
         );
     }
@@ -95,9 +95,11 @@ public class IRCManager {
 
     public void send(String text) {
         this.bot.sendIRC().message(channel, text);
+        viewMessage(null, text);
     }
 
     public void viewMessage(String nick, String text) {
+        if (nick == null) { nick = this.bot.getNick(); }
         String view = String.format(
             "[%sIRC%s] %s: %s",
             ChatColors.AQUA, ChatColors.RESET, nick, text
