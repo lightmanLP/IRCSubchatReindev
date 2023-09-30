@@ -14,9 +14,13 @@ public class IRCSubchatMod extends Mod implements ClientMod {
 
     public Config cfg;
 
+    public IRCSubchatMod() {
+        assert INSTANCE == null;
+        INSTANCE = this;
+    }
+
     @Override
     public void onPreInit() {
-        INSTANCE = this;
         try {
             this.cfg = new FileConfig();
         } catch (IOException exc) {

@@ -12,7 +12,7 @@ buildscript {
 
 apply plugin: 'java'
 
-version '0.0.1'
+version '0.0.2'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'foxloader.dev'
@@ -30,25 +30,31 @@ repositories {
 
 dependencies {
     clientImplementation 'com.github.pircbotx:pircbotx:2.3.1'
-    clientImplementation 'org.apache.commons:commons-lang3:3.12.0'
     clientImplementation 'commons-codec:commons-codec:1.15'
-
     clientImplementation 'org.slf4j:slf4j-api:2.0.9'
+    clientImplementation 'org.slf4j:slf4j-jdk14:2.0.9'
+    clientImplementation 'com.github.LlamaLad7:MixinExtras:0.1.1'
+
+    annotationProcessor 'com.github.LlamaLad7:MixinExtras:0.1.1'
 }
 
 shadowJar {
     archiveClassifier.set("shadow")
     from sourceSets.client.output
     configurations = [project.configurations.clientImplementation]
+    mergeServiceFiles()
     dependencies {
         include dependency('com.github.pircbotx:pircbotx:2.3.1')
-        include dependency('org.apache.commons:commons-lang3:3.12.0')
         include dependency('commons-codec:commons-codec:1.15')
-
         include dependency('org.slf4j:slf4j-api:2.0.9')
+        include dependency('org.slf4j:slf4j-jdk14:2.0.9')
+        include dependency('com.github.LlamaLad7:MixinExtras:0.1.1')
     }
     relocate 'org.pircbotx', 'com.lightmanlp.libs.pircbotx'
-    relocate 'org.apache.commons', 'com.lightmanlp.libs.apache.commons'
+    relocate 'org.apache.commons.codec', 'com.lightmanlp.libs.apache.commons.codec'
+    relocate 'org.slf4j', 'com.lightmanlp.libs.slf4j'
+    // exploded
+    // relocate 'com.llamalad7.mixinextras', 'com.lightmanlp.libs.mixinextras'
 }
 
 build.dependsOn shadowJar

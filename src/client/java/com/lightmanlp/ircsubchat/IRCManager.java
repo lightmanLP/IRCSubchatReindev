@@ -12,11 +12,10 @@ import org.pircbotx.hooks.Listener;
 import org.pircbotx.hooks.managers.BackgroundListenerManager;
 
 import com.fox2code.foxloader.loader.ClientMod;
-
-import com.lightmanlp.ircsubchat.configs.Config;
+import com.fox2code.foxloader.network.ChatColors;
 
 public class IRCManager {
-    private static IRCManager INSTANCE = null;
+    private static IRCManager INSTANCE;
 
     private BackgroundListenerManager listenerManager;
     private PircBotX bot;
@@ -28,6 +27,16 @@ public class IRCManager {
     private String password;
     private Delay reconnectDelay;
 
+    public IRCManager() {
+        this(
+            IRCSubchatMod.INSTANCE.cfg.nickname,
+            IRCSubchatMod.INSTANCE.cfg.server,
+            IRCSubchatMod.INSTANCE.cfg.channel,
+            IRCSubchatMod.INSTANCE.cfg.password,
+            new AdaptingDelay(500, 10000)
+        );
+    }
+
     public IRCManager(
         String nickname,
         String server,
@@ -35,6 +44,9 @@ public class IRCManager {
         String password,
         Delay reconnectDelay
     ) {
+        assert INSTANCE == null;
+        INSTANCE = this;
+
         this.nickname = nickname;
         this.server = server;
         this.channel = channel;
@@ -44,14 +56,7 @@ public class IRCManager {
 
     public static IRCManager get() {
         if (INSTANCE == null) {
-            Config cfg = IRCSubchatMod.INSTANCE.cfg;
-            INSTANCE = new IRCManager(
-                cfg.nickname,
-                cfg.server,
-                cfg.channel,
-                cfg.password,
-                new AdaptingDelay(500, 10000)
-            );
+            new IRCManager();
         }
         return INSTANCE;
     }
@@ -94,8 +99,8 @@ public class IRCManager {
 
     public void viewMessage(String nick, String text) {
         String view = String.format(
-            "[\u00A7bIRC\u00A7r] %s: %s",
-            nick, text
+            "[%sIRC%s] %s: %s",
+            ChatColors.AQUA, ChatColors.RESET, nick, text
         );
         ClientMod.getGameInstance().ingameGUI.addChatMessage(view);
     }

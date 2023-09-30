@@ -2,9 +2,12 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.lightmanlp.ircsubchat.mixins",
+  "plugin": "com.lightmanlp.ircsubchat.IRCSubchatMixinPlugin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinEntityClientPlayerMP",
-    "MixinEntityPlayerSP"
+    "MixinEntityPlayerSP",
+    "MixinPlayerCommandHandler",
+    "MixinPacket252CommandList"
   ]
 }

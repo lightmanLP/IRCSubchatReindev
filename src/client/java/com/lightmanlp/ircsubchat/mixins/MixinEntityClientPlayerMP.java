@@ -11,7 +11,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.lightmanlp.ircsubchat.CommandProcessor;
+import com.lightmanlp.ircsubchat.ChatProcessor;
+
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 @Mixin(EntityClientPlayerMP.class)
 public abstract class MixinEntityClientPlayerMP extends EntityPlayerSP {
@@ -19,10 +22,17 @@ public abstract class MixinEntityClientPlayerMP extends EntityPlayerSP {
         super(minecraft, world, session, arg4);
     }
 
-    @Inject(method = "sendChatMessage", at = @At(value = "HEAD"), cancellable = true)
-    public void sendChatMessageMixin(String s, CallbackInfo ci) {
-        if (CommandProcessor.process(s)) {
+    @Inject(
+        method = "sendChatMessage",
+        at = @At(value = "HEAD"),
+        cancellable = true
+    )
+    public void sendChatMessageMixin(String msg, CallbackInfo ci, @Local LocalRef<String> msgRef) {
+        String result = ChatProcessor.get().process(msg);
+        if (result == null) {
             ci.cancel();
+        } else {
+            msgRef.set(result);
         }
-   }
+    }
 }
