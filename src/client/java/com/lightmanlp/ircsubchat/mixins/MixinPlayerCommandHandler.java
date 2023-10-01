@@ -14,6 +14,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.mitask.PlayerCommandHandler;
 import net.minecraft.mitask.command.Command;
+import net.minecraft.mitask.command.CommandErrorHandler;
 import net.minecraft.src.client.player.EntityPlayerSP;
 
 @Mixin(PlayerCommandHandler.class)
@@ -43,5 +44,20 @@ public abstract class MixinPlayerCommandHandler {
             original.call(self, command, commandExecutor, commandMessage);
         }
         ChatProcessor.sendCurrentCommand.set(!execNeeded);
+    }
+
+    @WrapOperation(
+        method = "handleSlashCommand",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/src/client/player/EntityPlayerSP;addChatMessage")
+    )
+    public void sendErrorMessageWrap(
+        EntityPlayerSP self,
+        String msg,
+        Operation<Void> original
+    ) {
+        Minecraft mc = Minecraft.getInstance();
+        if (!(msg == CommandErrorHandler.invalidCommand && mc.isMultiplayerWorld())) {
+            original.call(msg);
+        }
     }
 }

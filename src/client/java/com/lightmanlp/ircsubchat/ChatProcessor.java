@@ -28,6 +28,7 @@ public class ChatProcessor {
         Minecraft mc = Minecraft.getInstance();
 
         if (mc.lineIsCommand(text)) {
+            sendCurrentCommand.set(true);
             PlayerCommandHandler.instance.handleSlashCommand(text, mc.thePlayer);
             assert sendCurrentCommand.get() != null;
             if (sendCurrentCommand.get()) {
