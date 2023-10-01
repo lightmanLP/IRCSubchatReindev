@@ -56,7 +56,7 @@ public abstract class MixinPlayerCommandHandler {
         Operation<Void> original
     ) {
         Minecraft mc = Minecraft.getInstance();
-        if (!(msg == CommandErrorHandler.invalidCommand && mc.isMultiplayerWorld())) {
+        if (!(msg.equals(CommandErrorHandler.invalidCommand) && mc.isMultiplayerWorld())) {
             original.call(msg);
         }
     }

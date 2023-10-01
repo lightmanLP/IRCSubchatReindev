@@ -90,7 +90,7 @@ public class IRCManager {
     }
 
     private void sendInternal(String text) {
-        if (text == "") { return; }
+        if (text.equals("")) { return; }
         this.bot.sendIRC().message(this.cfg.getChannelHashed(), text);
     }
 
