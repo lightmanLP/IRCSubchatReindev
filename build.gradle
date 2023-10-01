@@ -14,7 +14,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'io.freefair.lombok'
 
-version '0.0.2'
+version '0.0.3'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'foxloader.dev'
@@ -36,7 +36,7 @@ dependencies {
     clientImplementation 'org.slf4j:slf4j-api:2.0.9'
     clientImplementation 'org.slf4j:slf4j-jdk14:2.0.9'
     clientImplementation 'io.github.llamalad7:mixinextras-common:0.2.0-rc.5'
-	
+
 	annotationProcessor 'io.github.llamalad7:mixinextras-common:0.2.0-rc.5'
 }
 
@@ -82,7 +82,7 @@ publishing {
             groupId = 'com.github.lightmanlp'
             artifactId = 'ircsubchat'
             version = project.version
-			
+
             from components.java
         }
     }
