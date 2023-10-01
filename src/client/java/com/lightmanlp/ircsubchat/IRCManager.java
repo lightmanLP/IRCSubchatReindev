@@ -1,31 +1,40 @@
 package com.lightmanlp.ircsubchat;
 
 import java.io.IOException;
-import java.util.logging.Level;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.pircbotx.Configuration;
 import org.pircbotx.PircBotX;
 import org.pircbotx.delay.AdaptingDelay;
 import org.pircbotx.delay.Delay;
+import org.pircbotx.delay.StaticDelay;
 import org.pircbotx.exception.IrcException;
 import org.pircbotx.hooks.Listener;
 import org.pircbotx.hooks.managers.BackgroundListenerManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fox2code.foxloader.loader.ClientMod;
 import com.fox2code.foxloader.network.ChatColors;
 
 public class IRCManager {
     private static IRCManager INSTANCE;
+    private static final Logger LOGGER = LoggerFactory.getLogger(IRCManager.class);
+    private static final int SEND_RETRIES = 5;
+    private static final Delay SEND_RETRY_DELAY = new StaticDelay(250);
 
     private BackgroundListenerManager listenerManager;
     private PircBotX bot;
-    private Thread thread;
+    private Thread listenerThread;
+    private Thread senderThread;
+    private BlockingQueue<String> messagesQueue;
 
-    private String nickname;
-    private String server;
-    private String channel;
-    private String password;
-    private Delay reconnectDelay;
+    public String nickname;
+    public String server;
+    public String channel;
+    public String password;
+    public Delay reconnectDelay;
 
     public IRCManager() {
         this(
@@ -63,8 +72,8 @@ public class IRCManager {
 
     public void start() {
         this.listenerManager = new BackgroundListenerManager();
+        Listener listener = new IRCListener(this);
 
-        Listener listener = new IRCListener();
         Configuration configuration = new Configuration.Builder()
             .setName(nickname)
             .setAutoNickChange(true)
@@ -76,26 +85,24 @@ public class IRCManager {
             .setListenerManager(listenerManager)
             .addListener(listener)
             .buildConfiguration();
-
         this.bot = new PircBotX(configuration);
-        thread = new Thread(this::threadWorker);
-        thread.setDaemon(true);
-        thread.start();
-    }
 
-    private void threadWorker() {
-        try {
-            this.bot.startBot();
-        } catch (IOException exc) {
-            IRCSubchatMod.INSTANCE.getLogger().log(Level.WARNING, "error", exc);  // TODO
-        } catch (IrcException exc) {
-            IRCSubchatMod.INSTANCE.getLogger().log(Level.WARNING, "error", exc);  // TODO
-        }
+        this.messagesQueue = new LinkedBlockingQueue<>();
+        this.listenerThread = new Thread(this::listenerThreadWorker);
+        this.listenerThread.setDaemon(true);
+        this.listenerThread.start();
+        this.senderThread = new Thread(this::sendThreadWorker);
+        this.senderThread.setDaemon(true);
+        this.senderThread.start();
     }
 
     public void send(String text) {
+        this.messagesQueue.add(text);
+    }
+
+    private void sendInternal(String text) {
+        if (text == "") { return; }
         this.bot.sendIRC().message(channel, text);
-        viewMessage(null, text);
     }
 
     public void viewMessage(String nick, String text) {
@@ -105,5 +112,47 @@ public class IRCManager {
             ChatColors.AQUA, ChatColors.RESET, nick, text
         );
         ClientMod.getGameInstance().ingameGUI.addChatMessage(view);
+    }
+
+    private void listenerThreadWorker() {
+        try {
+            while (true) {
+                try {
+                    this.bot.startBot();
+                } catch (IOException exc) {
+                    LOGGER.error("IRC connection error", exc);
+                }
+                try {
+                    Thread.sleep(this.reconnectDelay.getDelay());
+                } catch (InterruptedException exc) {}
+            }
+        } catch (IrcException exc) {
+            LOGGER.error("IRC init error", exc);
+        }
+    }
+
+    private void sendThreadWorker() {
+        while (true) {
+            try {
+                String text = this.messagesQueue.take();
+                int retries = 0;
+                while (retries < SEND_RETRIES) {
+                    try {
+                        sendInternal(text);
+                        viewMessage(null, text);
+                        break;
+                    } catch (Exception exc) {
+                        LOGGER.warn("Error sending IRC message", exc);
+                        ++retries;
+                        Thread.sleep(SEND_RETRY_DELAY.getDelay());
+                    }
+                }
+                if (retries == SEND_RETRIES) {
+                    viewMessage(null, ChatColors.RED + text);
+                }
+            } catch (InterruptedException exc) {
+                LOGGER.warn("Unexpected interrupt", exc);
+            }
+        }
     }
 }
