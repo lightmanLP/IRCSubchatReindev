@@ -12,10 +12,9 @@ public class IRCListener extends ListenerAdapter {
 
     @Override
     public void onMessage(MessageEvent event) {
-        // TODO: check this
-        // if (event.getChannel().getName() != channel) {
-        //     return;
-        // }
+        if (event.getChannel().getName() != manager.cfg.getChannel()) {
+            return;
+        }
         IRCManager.get().viewMessage(
             event.getUser().getNick(),
             event.getMessage()

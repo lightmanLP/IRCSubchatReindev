@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fox2code.foxloader.loader.ClientMod;
 import com.fox2code.foxloader.network.ChatColors;
+import com.lightmanlp.ircsubchat.configs.Config;
 
 public class IRCManager {
     private static IRCManager INSTANCE;
@@ -30,36 +31,24 @@ public class IRCManager {
     private Thread senderThread;
     private BlockingQueue<String> messagesQueue;
 
-    public String nickname;
-    public String server;
-    public String channel;
-    public String password;
+    public Config cfg;
     public Delay reconnectDelay;
 
     public IRCManager() {
         this(
-            IRCSubchatMod.INSTANCE.cfg.getNickname(),
-            IRCSubchatMod.INSTANCE.cfg.getServer(),
-            IRCSubchatMod.INSTANCE.cfg.getChannel(),
-            IRCSubchatMod.INSTANCE.cfg.getPassword(),
+            IRCSubchatMod.INSTANCE.cfg,
             new AdaptingDelay(500, 10000)
         );
     }
 
     public IRCManager(
-        String nickname,
-        String server,
-        String channel,
-        String password,
+        Config cfg,
         Delay reconnectDelay
     ) {
         assert INSTANCE == null;
         INSTANCE = this;
 
-        this.nickname = nickname;
-        this.server = server;
-        this.channel = channel;
-        this.password = password;
+        this.cfg = cfg;
         this.reconnectDelay = reconnectDelay;
     }
 
@@ -75,14 +64,14 @@ public class IRCManager {
         Listener listener = new IRCListener(this);
 
         Configuration configuration = new Configuration.Builder()
-            .setName(nickname)
+            .setName(this.cfg.getNickname())
             .setAutoNickChange(true)
-            .addServer(this.server)
-            .addAutoJoinChannel(this.channel)
-            .setServerPassword(this.password)
+            .addServer(this.cfg.getServer())
+            .addAutoJoinChannel(this.cfg.getChannelHashed())
+            .setServerPassword(this.cfg.getPassword())
             .setAutoReconnect(true)
             .setAutoReconnectDelay(this.reconnectDelay)
-            .setListenerManager(listenerManager)
+            .setListenerManager(this.listenerManager)
             .addListener(listener)
             .buildConfiguration();
         this.bot = new PircBotX(configuration);
@@ -102,7 +91,7 @@ public class IRCManager {
 
     private void sendInternal(String text) {
         if (text == "") { return; }
-        this.bot.sendIRC().message(channel, text);
+        this.bot.sendIRC().message(this.cfg.getChannelHashed(), text);
     }
 
     public void viewMessage(String nick, String text) {
