@@ -124,15 +124,14 @@ public class IRCManager {
         while (true) {
             try {
                 String text = this.messagesQueue.take();
-                int retries = 0;
-                while (retries < SEND_RETRIES) {
+                int retries;
+                for (retries = 0; retries < SEND_RETRIES; ++retries) {
                     try {
                         sendInternal(text);
                         viewMessage(null, text);
                         break;
                     } catch (Exception exc) {
                         LOGGER.warn("Error sending IRC message", exc);
-                        ++retries;
                         Thread.sleep(SEND_RETRY_DELAY.getDelay());
                     }
                 }

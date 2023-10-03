@@ -14,7 +14,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'io.freefair.lombok'
 
-version '0.0.3'
+version '0.1.0'
 
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'foxloader.dev'
